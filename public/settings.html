@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWNcrack - Settings</title>
+  <link id="theme-stylesheet" rel="preload" href="/user-theme.css" as="style">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <style>
+    /* Hide the body until the CSS is loaded */
+    body {
+      display: none;
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+    }
+    @media (max-width: 830px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <button id="menu-toggle">Menu</button>
+      <ul id="nav-menu">
+        <li><a href="index.html">Key</a></li>
+        <li><a href="submit.html">Submit</a></li>
+        <li><a href="nets.html">Nets</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="donations.html">Donations</a></li>
+        <li><a href="rank.html">Rank</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div id="login-container" style="position: absolute; top: 10px; right: 10px;">
+    <span id="loggedIn" data-loggedin="false">Key: Not Logged In</span><br>
+    <span id="user-rank">Rank: common</span><br>
+    <span id="rank-time">Rank-Time: N/A</span><br>
+    <input type="text" id="login-key" placeholder="Enter Key" />
+    <button id="login-button">Login</button>
+    <button id="logout-button" style="display:none;">Logout</button>
+  </div>  
+  <main>
+    <section>
+      <h1>User Settings</h1>
+      <form id="settingsForm" enctype="multipart/form-data">
+        <label for="theme">Theme:</label>
+        <select id="theme" name="theme" required>
+          <option value="Aqua">Aqua</option>
+          <option value="Purple">Purple</option>
+          <option value="Black/Purple">Black/Purple</option>
+          <option value="Black/Green">Black/Green</option>
+          <option value="Black/Orange">Black/Orange</option>
+        </select>
+        <br>
+        <label for="display">Display uncracked hashes:</label>
+        <input type="checkbox" id="display" name="display">
+        <br>
+        <label for="username">Username (optional):</label>
+        <input type="text" id="username" name="username">
+        <br>
+        <label for="leaderboard">Appear on leaderboard:</label>
+        <input type="checkbox" id="leaderboard" name="leaderboard">
+        <br>
+        <label for="BSSID-display">Display BSSID:</label>
+        <input type="checkbox" id="BSSID-display" name="BSSID_display">
+        <br>
+        <label for="discord-webhook-url">Discord webhook URL:</label>
+        <input type="text" id="discord-webhook-url" name="discord_webhook_url">
+        <br>
+        <label for="display-cracked-content">Send cracked content to webhook:</label>
+        <input type="checkbox" id="display-cracked-content" name="display_cracked_content">
+        <br>
+        <button type="button" id="save-button">Save</button>
+      </form>
+      <div id="settingsStatus"></div>
+    </section>
+  </main>
+  <footer>
+    <p><a href="faq.html">Frequently Asked Questions</a> | &copy; 2025 Distributed WPA Cracking Initiative by <a href="https://github.com/Terminatoror">Terminatoror</a> | <a href="Terms-of-Service.html">Terms of Service</a></p>
+  </footer>
+  <script src="/js/css-loader.js"></script>
+  <script src="/js/login.js"></script>
+  <script src="/js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        themeStylesheet.href = `/user-theme.css?key=${userKey}`;
+        themeStylesheet.rel = 'stylesheet'; // Change rel to stylesheet after loading
+        themeStylesheet.onload = () => {
+          document.body.style.display = 'block'; // Show the body once the CSS is loaded
+        };
+
+        // Fetch user settings from the server
+        fetch(`/user-settings?key=${userKey}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById('theme').value = data.theme || 'Aqua';
+              document.getElementById('display').checked = data.display === 'true';
+              document.getElementById('username').value = data.username || '';
+              document.getElementById('leaderboard').checked = data.leaderboard === 'true';
+              document.getElementById('BSSID-display').checked = data.BSSID_display === 'true';
+              document.getElementById('discord-webhook-url').value = data.discord_webhook_url || '';
+              document.getElementById('display-cracked-content').checked = data.display_cracked_content === 'true';
+            }
+          })
+          .catch(err => {
+            console.error('Error fetching user settings:', err);
+          });
+
+        fetch(`/user-rank-info?key=${userKey}`)
+          .then(res => res.json())
+          .then(data => {
+            const rankDisplay = document.getElementById('user-rank');
+            rankDisplay.textContent = 'Rank: ' + (data.rank ? data.rank : 'common');
+            const rankTimeDisplay = document.getElementById('rank-time');
+            let timeRemaining = data.timeRemaining;
+            function updateCountdown() {
+              let remaining = timeRemaining;
+              const months = Math.floor(remaining / (30 * 24 * 3600));
+              remaining %= (30 * 24 * 3600);
+              const days = Math.floor(remaining / (24 * 3600));
+              remaining %= (24 * 3600);
+              const hours = Math.floor(remaining / 3600);
+              remaining %= 3600;
+              const minutes = Math.floor(remaining / 60);
+              const seconds = remaining % 60;
+              rankTimeDisplay.textContent = `Rank-Time: ${months}mo ${days}d ${hours}h ${minutes}m ${seconds}s`;
+              if (timeRemaining > 0) {
+                timeRemaining--;
+              }
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+          })
+          .catch(err => {
+            console.error('Error fetching rank info:', err);
+          });
+      } else {
+        document.body.style.display = 'block'; // Show the body if no user key is found
+      }
+    });
+
+    // Automatically apply theme on change without saving to database
+    document.getElementById('theme').addEventListener('change', function() {
+      const theme = this.value;
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        const newStylesheet = themeStylesheet.cloneNode();
+        newStylesheet.href = `/user-theme.css?key=${userKey}&theme=${theme}`;
+        newStylesheet.rel = 'stylesheet';
+        newStylesheet.onload = () => {
+          themeStylesheet.remove();
+        };
+        document.head.appendChild(newStylesheet);
+      }
+    });
+
+    document.getElementById('display').addEventListener('change', function() {
+      const display = this.checked ? 'true' : 'false';
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        fetch('/update-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            key: userKey,
+            display: display
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('settingsStatus').innerHTML = 'Display setting applied.';
+          } else {
+            document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error applying display setting.</span>';
+          }
+        })
+        .catch(err => {
+          document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error: ' + err + '</span>';
+        });
+      }
+    });
+
+    document.getElementById('leaderboard').addEventListener('change', function() {
+      const leaderboard = this.checked ? 'true' : 'false';
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        fetch('/update-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            key: userKey,
+            leaderboard: leaderboard
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('settingsStatus').innerHTML = 'Leaderboard setting applied.';
+          } else {
+            document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error applying leaderboard setting.</span>';
+          }
+        })
+        .catch(err => {
+          document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error: ' + err + '</span>';
+        });
+      }
+    });
+
+    document.getElementById('BSSID-display').addEventListener('change', function() {
+      const BSSID_display = this.checked ? 'true' : 'false';
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        fetch('/update-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            key: userKey,
+            BSSID_display: BSSID_display
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('settingsStatus').innerHTML = 'BSSID display setting applied.';
+          } else {
+            document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error applying BSSID display setting.</span>';
+          }
+        })
+        .catch(err => {
+          document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error: ' + err + '</span>';
+        });
+      }
+    });
+
+    document.getElementById('username').addEventListener('input', function() {
+      const username = this.value;
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        fetch('/update-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            key: userKey,
+            username: username
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('settingsStatus').innerHTML = 'Username setting applied.';
+          } else if (data.error === 'Username already taken') {
+            document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error: Username already taken.</span>';
+          } else {
+            document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error applying username setting.</span>';
+          }
+        })
+        .catch(err => {
+          document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error: ' + err + '</span>';
+        });
+      }
+    });
+
+    document.getElementById('save-button').addEventListener('click', function() {
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        const theme = document.getElementById('theme').value;
+        const display = document.getElementById('display').checked ? 'true' : 'false';
+        const username = document.getElementById('username').value;
+        const leaderboard = document.getElementById('leaderboard').checked ? 'true' : 'false';
+        const BSSID_display = document.getElementById('BSSID-display').checked ? 'true' : 'false';
+        const discord_webhook_url = document.getElementById('discord-webhook-url').value;
+        const display_cracked_content = document.getElementById('display-cracked-content').checked ? 'true' : 'false';
+
+        fetch('/update-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            key: userKey,
+            theme: theme,
+            display: display,
+            username: username,
+            leaderboard: leaderboard,
+            BSSID_display: BSSID_display,
+            discord_webhook_url: discord_webhook_url,
+            display_cracked_content: display_cracked_content
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('settingsStatus').innerHTML = 'Settings saved.';
+            setTimeout(() => {
+              location.reload(); // Refresh the page to apply the new settings
+            }, 50);
+          } else {
+            document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error saving settings.</span>';
+          }
+        })
+        .catch(err => {
+          console.error('Error saving settings:', err);
+          document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">Error: ' + err.message + '</span>';
+        });
+      } else {
+        document.getElementById('settingsStatus').innerHTML = '<span style="color: red;">No user key found. Please log in.</span>';
+      }
+    });
+  </script>
+</body>
+</html>

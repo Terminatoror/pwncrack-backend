@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redeem Rank Key - PWNcrack</title>
+    <link id="theme-stylesheet" rel="preload" href="/user-theme.css" as="style" />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <style>
+      /* Hide body until theme loads */
+      body { display: none; }
+      @media (max-width: 600px) {
+        #loggedIn, #user-rank, #rank-time {
+          display: none;
+        }
+        #menu-toggle {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+        }
+        #login-container {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+        }
+        #login-key {
+          position: absolute;
+          top: 17px; /* Set top to 17px */
+          right: 80px; /* Set right to 80px */
+        }
+        #login-button {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+        }
+      }
+      @media (max-width: 830px) {
+        #loggedIn, #user-rank, #rank-time {
+          display: none;
+        }
+        #login-key {
+          position: absolute;
+          top: 17px; /* Set top to 17px */
+          right: 80px; /* Set right to 80px */
+        }
+        #login-button {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header with navbar and login status -->
+    <header>
+      <nav>
+        <button id="menu-toggle">Menu</button>
+        <ul id="nav-menu">
+          <li><a href="index.html">Key</a></li>
+          <li><a href="submit.html">Submit</a></li>
+          <li><a href="nets.html">Nets</a></li>
+          <li><a href="leaderboard.html">Leaderboard</a></li>
+          <li><a href="stats.html">Stats</a></li>
+          <li><a href="settings.html">Settings</a></li>
+          <li><a href="donations.html">Donations</a></li>
+          <li><a href="redeem.html" class="active">Redeem</a></li>
+        </ul>
+      </nav>
+    </header>
+    <div id="login-container" style="position: absolute; top: 10px; right: 10px;">
+      <span id="loggedIn" data-loggedin="false">Key: Not Logged In</span><br>
+      <!-- Added rank display -->
+      <span id="user-rank">Rank: common</span><br>
+      <!-- Added rank time display -->
+      <span id="rank-time">Rank-Time: N/A</span><br>
+      <input type="text" id="login-key" placeholder="Enter Key" />
+      <button id="login-button">Login</button>
+      <button id="logout-button" style="display: none;">Logout</button>
+    </div>
+
+    <!-- Main content -->
+    <main>
+      <div class="container">
+        <h1>Redeem Your Rank Key</h1>
+        <p>Enter your 12-character rank key to activate VIP status.</p>
+        <!-- Warning message if not logged in -->
+        <div id="login-warning" style="color: red; font-weight: bold; display: none;">
+          You need to login to upgrade your rank.
+        </div>
+        <form id="redeemForm">
+          <div class="form-field">
+            <label for="rankKey">Rank Key (12 letters/digits)</label>
+            <input type="text" id="rankKey" maxlength="12" placeholder="Enter rank key" required />
+          </div>
+          <button type="submit" class="btn" id="redeem-button">Redeem Key</button>
+        </form>
+        <div id="result" class="result-message"></div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <p>&copy; 2025 Distributed WPA Cracking Initiative</p>
+      </div>
+    </footer>
+
+    <!-- Include common scripts -->
+    <script src="/js/css-loader.js"></script>
+    <script src="/js/login.js"></script>
+    <script src="/js/script.js"></script>
+    <script>
+      // Show body once theme loads and initialize page
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.style.display = 'block';
+        const storedKey = localStorage.getItem('userKey');
+        const redeemBtn = document.getElementById('redeem-button');
+        const loginWarning = document.getElementById('login-warning');
+        // If no key found, disable form submission and show warning
+        if(!storedKey) {
+          redeemBtn.disabled = true;
+          loginWarning.style.display = 'block';
+        } else {
+          redeemBtn.disabled = false;
+          loginWarning.style.display = 'none';
+          const themeStylesheet = document.getElementById('theme-stylesheet');
+          themeStylesheet.href = `/user-theme.css?key=${storedKey}`;
+          themeStylesheet.rel = 'stylesheet';
+          document.getElementById('loggedIn').textContent = 'Key: ' + storedKey;
+          document.getElementById('login-key').style.display = 'none';
+          document.getElementById('login-button').style.display = 'none';
+          document.getElementById('logout-button').style.display = 'inline';
+          // Fetch user's rank info and update rank and countdown
+          fetch(`/user-rank-info?key=${storedKey}`)
+            .then(res => res.json())
+            .then(data => {
+              const rankDisplay = document.getElementById('user-rank');
+              rankDisplay.textContent = 'Rank: ' + (data.rank ? data.rank : 'common');
+              const rankTimeDisplay = document.getElementById('rank-time');
+              let timeRemaining = data.timeRemaining;
+              function updateCountdown() {
+                let remaining = timeRemaining;
+                const months = Math.floor(remaining / (30 * 24 * 3600));
+                remaining %= (30 * 24 * 3600);
+                const days = Math.floor(remaining / (24 * 3600));
+                remaining %= (24 * 3600);
+                const hours = Math.floor(remaining / 3600);
+                remaining %= 3600;
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                rankTimeDisplay.textContent = `Rank-Time: ${months}mo ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                if (timeRemaining > 0) {
+                  timeRemaining--;
+                }
+              }
+              updateCountdown();
+              setInterval(updateCountdown, 1000);
+            })
+            .catch(err => {
+              console.error('Error fetching rank info:', err);
+            });
+        }
+      });
+
+      // Login and logout button events
+      document.getElementById('login-button').addEventListener('click', () => {
+        window.location.href = '/login.html';
+      });
+
+      document.getElementById('logout-button').addEventListener('click', async () => {
+        await fetch('/logout', { method: 'POST' });
+        localStorage.removeItem('userKey');
+        location.reload();
+      });
+
+      // Redeem form submission
+      document.getElementById('redeemForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const rankKey = document.getElementById('rankKey').value.trim();
+        const userKey = localStorage.getItem('userKey');
+        try {
+          const res = await fetch('/redeem-rank', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ userKey, rankKey })
+          });
+          const data = await res.json();
+          document.getElementById('result').textContent = data.message || data.error;
+        } catch (err) {
+          document.getElementById('result').textContent = "An error occurred. Please try again.";
+        }
+      });
+    </script>
+  </body>
+</html>

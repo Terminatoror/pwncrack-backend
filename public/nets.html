@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWNcrack - Nets</title>
+  <link id="theme-stylesheet" rel="preload" href="/user-theme.css" as="style">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <style>
+    /* Hide the body until the CSS is loaded */
+    body {
+      display: none;
+    }
+    #fileList {
+      list-style: none;
+      padding: 0;
+    }
+    #fileList li {
+      padding: 5px;
+      border-bottom: 1px solid #ccc;
+    }
+    /* Add styles for the two-column layout */
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      table-layout: fixed; /* Ensure table fits within the container */
+    }
+    .result-table th, .result-table td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+      word-wrap: break-word; /* Allow text to wrap within cells */
+    }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .result-table th, .result-table td {
+        padding: 5px;
+        font-size: 0.8em; /* Reduce font size on smaller screens */
+      }
+      #search-bar {
+        width: 100%; /* Ensure search bar fits within the container */
+      }
+    }
+    #download-potfile, #download-hashes, #download-uncracked-hashes {
+      display: none;
+      margin-top: 10px;
+    }
+    #download-potfile {
+      display: inline !important;
+      margin-top: 10px;
+    }
+    #user-hashes-section {
+      margin-top: 40px; /* Add margin to prevent squishing */
+    }
+    .short-hash {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%; /* Make it flexible */
+    }
+    .short-hash::after {
+      content: attr(data-full-hash);
+      display: none;
+    }
+    .short-hash[data-full-hash-length="short"]::after {
+      display: none;
+    }
+    .hidden-row {
+      display: none; /* Hide the row */
+    }
+    @media (max-width: 600px) {
+      .copy-cell, .delete-cell, .copy-cell th, .delete-cell th {
+        display: none; /* Hide the copy and delete cells and their headers */
+      }
+    }
+    #search-bar {
+      margin-bottom: 10px;
+    }
+    .copy-button, .delete-button {
+      margin-right: 5px;
+      padding: 2px 5px;
+      font-size: 0.8em;
+      cursor: pointer;
+      width: 100%; /* Ensure buttons fit within their cells */
+      box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    }
+    .copy-cell, .delete-cell {
+      width: 100px; /* Reduce the size of the copy and delete columns */
+      padding: 0; /* Remove padding to fit the button */
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+    }
+    @media (max-width: 830px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-key, #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        margin: 5px 0; /* Add margin to prevent overlap */
+      }
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #menu-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      #login-key, #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        margin: 5px 0; /* Add margin to prevent overlap */
+      }
+    }
+    @media (max-width: 830px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #menu-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul id="nav-menu">
+        <li><a href="index.html">Key</a></li>
+        <li><a href="submit.html">Submit</a></li>
+        <li><a href="nets.html">Nets</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="donations.html">Donations</a></li>
+        <li><a href="rank.html">Rank</a></li>
+      </ul>
+      <button id="menu-toggle">Menu</button>
+    </nav>
+  </header>
+  <div style="position: absolute; top: 10px; right: 10px;">
+    <span id="loggedIn" data-loggedin="false">Key: Not Logged In</span><br>
+    <span id="user-rank">Rank: common</span><br>
+    <span id="rank-time">Rank-Time: N/A</span><br>
+    <input type="text" id="login-key" placeholder="Enter Key" />
+    <button id="login-button">Login</button>
+    <button id="logout-button" style="display:none;">Logout</button>
+  </div>  
+  <main>
+    <section>
+      <h1>Cracked Passwords</h1>
+      <input type="text" id="search-cracked-passwords" placeholder="Search cracked passwords...">
+      <p>Uploaded unique hashes: <span id="unique-hashes-count">0</span></p>
+      <button id="download-hashes">Download Hashes</button>
+      <button id="download-uncracked-hashes">Download Uncracked Hashes</button>
+      <button id="download-potfile">Download Potfile</button>
+      <button id="submit-password-button">Submit Password</button>
+      <!-- Create a table for displaying SSID and Password -->
+      <table class="result-table" id="resultTable">
+        <thead>
+          <tr>
+            <th>BSSID</th>
+            <th>SSID</th>
+            <th>Password</th>
+          </tr>
+        </thead>
+        <tbody id="results-table-body">
+          <!-- Cracked results will be dynamically added here -->
+        </tbody>
+      </table>
+    </section>
+    <section id="user-hashes-section" style="display: none;">
+      <h1>All Uploaded Hashes</h1>
+      <input type="text" id="search-bar" placeholder="Search for hashes...">
+      <table class="result-table" id="userHashesTable">
+        <thead>
+          <tr>
+            <th class="copy-cell">Copy</th>
+            <th class="delete-cell">Delete</th>
+            <th>Hash</th>
+            <th>SSID</th>
+            <th>Password</th>
+          </tr>
+        </thead>
+        <tbody id="user-hashes-table-body">
+          <!-- User hashes will be dynamically added here -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <footer>
+    <p><a href="faq.html">Frequently Asked Questions</a> | &copy; 2025 Distributed WPA Cracking Initiative by <a href="https://github.com/Terminatoror">Terminatoror</a> | <a href="Terms-of-Service.html">Terms of Service</a></p>
+  </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          const loginInfo = document.getElementById('loggedIn');
+          const loginInput = document.getElementById('login-key');
+          const loginButton = document.getElementById('login-button');
+          const logoutButton = document.getElementById('logout-button');
+          const fileList = document.getElementById('fileList');
+          const resultTableBody = document.getElementById('resultTable').getElementsByTagName('tbody')[0];
+          const downloadPotfileButton = document.getElementById('download-potfile');
+          const downloadHashesButton = document.getElementById('download-hashes');
+          const downloadUncrackedHashesButton = document.getElementById('download-uncracked-hashes');
+          const uniqueHashesCount = document.getElementById('unique-hashes-count');
+
+          // Set to store unique SSID:Password combinations
+          const uniqueResults = new Set();
+          function checkLoginStatus() {
+              fetch('/status')
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.loggedIn) {
+                          loginInfo.textContent = 'Key: ' + data.key;
+                          loginInfo.dataset.loggedin = "true";
+                          loginInput.style.display = 'none';
+                          loginButton.style.display = 'none';
+                          logoutButton.style.display = 'inline';
+                          fetchCrackedPasswords(data.key); // Fetch cracked passwords for the logged-in user
+                          checkPotfileExists(data.key); // Check if potfile exists
+                          fetchUniqueHashesCount(data.key); // Fetch unique hashes count
+                          fetchUserHashes(data.key); // Fetch all hashes uploaded by the user
+                          downloadHashesButton.style.display = 'inline'; // Show the button
+                          downloadHashesButton.onclick = () => {
+                              downloadHashes(data.key); // Set the download link
+                          };
+                          downloadUncrackedHashesButton.style.display = 'inline'; // Show the button
+                          downloadUncrackedHashesButton.onclick = () => {
+                              downloadUncrackedHashes(data.key); // Set the download link
+                          };
+                          downloadPotfileButton.style.display = 'inline'; // Show the button
+                          downloadPotfileButton.onclick = () => {
+                              window.location.href = `/download_potfile?key=${data.key}`; // Set the download link
+                          };
+                      } else {
+                          loginInfo.textContent = 'Key: Not Logged In';
+                          loginInfo.dataset.loggedin = "false";
+                          loginInput.style.display = 'inline';
+                          loginButton.style.display = 'inline';
+                          logoutButton.style.display = 'none';
+                          fileList.innerHTML = '<li>Please log in to see your files.</li>';
+                          resultTableBody.innerHTML = ''; // Clear the table
+                          downloadPotfileButton.style.display = 'none'; // Hide the button
+                          downloadHashesButton.style.display = 'none'; // Hide the button
+                          downloadUncrackedHashesButton.style.display = 'none'; // Hide the button
+                          uniqueHashesCount.textContent = '0'; // Reset the count
+                          document.getElementById('user-hashes-section').style.display = 'none'; // Hide the section
+                      }
+                  })
+                  .catch(error => console.error("Error checking login status:", error));
+          }
+
+          function fetchCrackedPasswords(userKey) {
+            fetch(`/results?key=${userKey}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    resultTableBody.innerHTML = ''; // Clear the table before updating
+                    if (data.message) {
+                        resultTableBody.innerHTML = `<tr><td colspan="3">${data.message}</td></tr>`;
+                    } else if (data.length === 0) {
+                        resultTableBody.innerHTML = '<tr><td colspan="3">No handshakes cracked yet.</td></tr>';
+                    } else {
+                        // Fetch user settings to check if BSSID should be displayed
+                        fetch(`/user-settings?key=${userKey}`)
+                            .then(response => response.json())
+                            .then(settings => {
+                                const displayBSSID = settings.BSSID_display === 'true';
+        
+                                // Sort the data alphabetically by SSID
+                                data.sort((a, b) => a.SSID.localeCompare(b.SSID));
+        
+                                // Loop through each cracked result
+                                data.forEach(result => {
+                                    const SSID = result.SSID;  // SSID
+                                    const password = result.password; // Password
+                                    const BSSID = result.BSSID; // BSSID
+                                    const uniqueKey = `${SSID}:${password}`; // Unique key for SSID and Password
+        
+                                    // If the combination hasn't been added before, add it to the table
+                                    if (!uniqueResults.has(uniqueKey)) {
+                                        const row = document.createElement('tr');
+                                        const SSIDCell = document.createElement('td');
+                                        const passwordCell = document.createElement('td');
+        
+                                        SSIDCell.textContent = SSID;  // SSID
+                                        passwordCell.textContent = password;  // Password
+        
+                                        if (displayBSSID) {
+                                            const BSSIDCell = document.createElement('td');
+                                            BSSIDCell.textContent = BSSID;  // BSSID
+                                            row.appendChild(BSSIDCell); // Add BSSID column
+                                        }
+        
+                                        row.appendChild(SSIDCell); // Add SSID column
+                                        row.appendChild(passwordCell); // Add Password column
+                                        resultTableBody.appendChild(row);
+        
+                                        // Add to the Set to track unique SSID:Password combinations
+                                        uniqueResults.add(uniqueKey);
+                                    }
+                                });
+
+                                // Adjust table headers based on BSSID display setting
+                                const resultTableHeader = document.querySelector('#resultTable thead tr');
+                                resultTableHeader.innerHTML = ''; // Clear existing headers
+                                if (displayBSSID) {
+                                  const BSSIDHeader = document.createElement('th');
+                                  BSSIDHeader.textContent = 'BSSID';
+                                  resultTableHeader.appendChild(BSSIDHeader);
+                                }
+                                const SSIDHeader = document.createElement('th');
+                                SSIDHeader.textContent = 'SSID';
+                                resultTableHeader.appendChild(SSIDHeader);
+                                const passwordHeader = document.createElement('th');
+                                passwordHeader.textContent = 'Password';
+                                resultTableHeader.appendChild(passwordHeader);
+                            })
+                            .catch(error => console.error("Error fetching user settings:", error));
+                    }
+                })
+                .catch(error => {
+                    resultTableBody.innerHTML = '<tr><td colspan="3">Error fetching cracked passwords.</td></tr>';
+                    console.error("Error fetching cracked passwords:", error);
+                });
+              }
+
+          function checkPotfileExists(userKey) {
+              fetch(`/check_potfile?key=${userKey}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.exists) {
+                          downloadPotfileButton.style.display = 'inline'; // Show the button
+                          downloadPotfileButton.onclick = () => {
+                              window.location.href = `/download_potfile?key=${userKey}`; // Set the download link
+                          };
+                      } else {
+                          downloadPotfileButton.style.display = 'none'; // Hide the button
+                      }
+                  })
+                  .catch(error => console.error("Error checking potfile existence:", error));
+          }
+
+          function fetchUniqueHashesCount(userKey) {
+              fetch(`/unique_hashes_count?key=${userKey}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      uniqueHashesCount.textContent = data.count;
+                  })
+                  .catch(error => console.error("Error fetching unique hashes count:", error));
+          }
+
+          function fetchUserHashes(userKey) {
+              fetch(`/user_hashes?key=${userKey}`)
+                  .then(response => {
+                      if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                      }
+                      return response.json();
+                  })
+                  .then(data => {
+                      const userHashesSection = document.getElementById('user-hashes-section');
+                      const userHashesTableBody = document.getElementById('user-hashes-table-body');
+                      userHashesTableBody.innerHTML = ''; // Clear the table before updating
+
+                      if (data.length === 0) {
+                          userHashesTableBody.innerHTML = '<tr><td colspan="5">No hashes uploaded yet.</td></tr>';
+                      } else {
+                          data.forEach(row => {
+                              const tableRow = document.createElement('tr');
+                              const copyCell = document.createElement('td');
+                              const deleteCell = document.createElement('td');
+                              const hashCell = document.createElement('td');
+                              const ssidCell = document.createElement('td');
+                              const passwordCell = document.createElement('td');
+
+                              const copyButton = document.createElement('button');
+                              copyButton.textContent = 'Copy';
+                              copyButton.classList.add('copy-button');
+                              copyButton.addEventListener('click', () => {
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                  navigator.clipboard.writeText(row.hash).then(() => {
+                                    alert('Hash copied to clipboard');
+                                  }).catch(err => {
+                                    console.error('Error copying hash:', err);
+                                  });
+                                } else {
+                                  // Fallback method
+                                  const textArea = document.createElement('textarea');
+                                  textArea.value = row.hash;
+                                  document.body.appendChild(textArea);
+                                  textArea.select();
+                                  try {
+                                    document.execCommand('copy');
+                                    alert('Hash copied to clipboard');
+                                  } catch (err) {
+                                    console.error('Error copying hash:', err);
+                                    alert('Failed to copy hash');
+                                  }
+                                  document.body.removeChild(textArea);
+                                }
+                              });
+
+                              const deleteButton = document.createElement('button');
+                              deleteButton.textContent = 'Delete';
+                              deleteButton.classList.add('delete-button');
+                              deleteButton.onclick = () => {
+                                if (confirm('Are you sure you want to delete this hash? Note: The potfile entry will remain.')) {
+                                  deleteHash(row.hash, userKey, tableRow);
+                                }
+                              };
+
+                              copyCell.classList.add('copy-cell');
+                              copyCell.appendChild(copyButton);
+                              deleteCell.classList.add('delete-cell');
+                              deleteCell.appendChild(deleteButton);
+                              hashCell.textContent = row.hash.length > 60 ? row.hash.substring(0, 60) + '...' : row.hash;
+                              hashCell.classList.add('short-hash');
+                              hashCell.setAttribute('data-full-hash', row.hash);
+                              hashCell.setAttribute('data-full-hash-length', row.hash.length < 6 ? 'short' : 'long');
+                              ssidCell.textContent = row.SSID || 'N/A';
+                              passwordCell.textContent = row.password || 'N/A';
+
+                              if (row.hash.length < 6) {
+                                tableRow.classList.add('hidden-row'); // Hide the row if hash length is less than 6
+                              }
+
+                              tableRow.appendChild(copyCell);
+                              tableRow.appendChild(deleteCell);
+                              tableRow.appendChild(hashCell);
+                              tableRow.appendChild(ssidCell);
+                              tableRow.appendChild(passwordCell);
+                              userHashesTableBody.appendChild(tableRow);
+                          });
+                      }
+
+                      userHashesSection.style.display = 'block'; // Show the section
+                  })
+                  .catch(error => {
+                      console.error("Error fetching user hashes:", error);
+                  });
+          }
+
+          function deleteHash(hash, userKey, tableRow) {
+              fetch(`/delete_hash`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ hash, key: userKey })
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+              })
+              .then(data => {
+                if (data.success) {
+                  tableRow.remove();
+                } else {
+                  alert('Error deleting hash');
+                }
+              })
+              .catch(error => {
+                console.error("Error deleting hash:", error);
+              });
+          }
+
+          function downloadHashes(userKey) {
+              fetch(`/download_hashes?key=${userKey}`)
+                  .then(response => {
+                      if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                      }
+                      return response.blob();
+                  })
+                  .then(blob => {
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.style.display = 'none';
+                      a.href = url;
+                      a.download = `${userKey}.hc22000`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                  })
+                  .catch(error => console.error("Error downloading hashes:", error));
+          }
+
+          function downloadUncrackedHashes(userKey) {
+              fetch(`/download_uncracked_hashes?key=${userKey}`)
+                  .then(response => {
+                      if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                      }
+                      return response.blob();
+                  })
+                  .then(blob => {
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.style.display = 'none';
+                      a.href = url;
+                      a.download = `${userKey}_uncracked.hc22000`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                  })
+                  .catch(error => console.error("Error downloading uncracked hashes:", error));
+          }
+
+          // Search function for all uploaded hashes (SSIDs only)
+          document.getElementById('search-bar').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#userHashesTable tbody tr');
+            rows.forEach(row => {
+              const ssidCell = row.querySelector('td:nth-child(4)');
+              if (ssidCell && ssidCell.textContent.toLowerCase().includes(searchTerm)) {
+                row.style.display = '';
+              } else {
+                row.style.display = 'none';
+              }
+            });
+          });
+
+          // Search function for cracked passwords (SSIDs only)
+          document.getElementById('search-cracked-passwords').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#resultTable tbody tr');
+            const displayBSSID = document.querySelector('#resultTable thead th').textContent === 'BSSID';
+            rows.forEach(row => {
+              const ssidCell = displayBSSID ? row.querySelector('td:nth-child(2)') : row.querySelector('td:nth-child(1)');
+              if (ssidCell && ssidCell.textContent.toLowerCase().includes(searchTerm)) {
+                row.style.display = '';
+              } else {
+                row.style.display = 'none';
+              }
+            });
+          });
+
+          // Logout function
+          logoutButton.addEventListener("click", function () {
+              fetch('/logout', { method: 'POST' })
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.success) {
+                          checkLoginStatus(); // Refresh UI after logout
+                      }
+                  })
+                  .catch(error => console.error("Logout failed:", error));
+          });
+
+          document.getElementById('submit-password-button').addEventListener('click', function () {
+            window.location.href = 'submit-password.html';
+          });
+
+          checkLoginStatus(); // Run this on page load
+      });
+    </script>
+
+  <script src="/js/css-loader.js"></script>
+  <script src="/js/login.js"></script>
+  <script src="/js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        themeStylesheet.href = `/user-theme.css?key=${userKey}`;
+        themeStylesheet.rel = 'stylesheet'; // Change rel to stylesheet after loading
+      }
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const storedKey = localStorage.getItem('userKey');
+      if (storedKey) {
+        fetch(`/user-rank-info?key=${storedKey}`)
+          .then(res => res.json())
+          .then(data => {
+            const rankDisplay = document.getElementById('user-rank');
+            rankDisplay.textContent = 'Rank: ' + (data.rank ? data.rank : 'common');
+            const rankTimeDisplay = document.getElementById('rank-time');
+            let timeRemaining = data.timeRemaining;
+            function updateCountdown() {
+              let remaining = timeRemaining;
+              const months = Math.floor(remaining / (30 * 24 * 3600));
+              remaining %= (30 * 24 * 3600);
+              const days = Math.floor(remaining / (24 * 3600));
+              remaining %= (24 * 3600);
+              const hours = Math.floor(remaining / 3600);
+              remaining %= 3600;
+              const minutes = Math.floor(remaining / 60);
+              const seconds = remaining % 60;
+              rankTimeDisplay.textContent = `Rank-Time: ${months}mo ${days}d ${hours}h ${minutes}m ${seconds}s`;
+              if (timeRemaining > 0) {
+                timeRemaining--;
+              }
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+          })
+          .catch(err => {
+            console.error('Error fetching rank info:', err);
+          });
+      }
+    });
+  </script>
+</body>
+</html>

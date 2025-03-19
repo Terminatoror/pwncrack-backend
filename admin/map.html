@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <!-- Leaflet Search CSS (make sure this is loaded after Leaflet CSS) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-search@2.9.0/dist/leaflet-search.min.css" />
+
+    <style>
+        /* Ensure the map has a height */
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <!-- Leaflet JS (make sure it's loaded first) -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+    <!-- Leaflet Search JS (load this after Leaflet JS) -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-search@2.9.0/dist/leaflet-search.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map
+            var map = L.map('map', { preferCanvas: true }).setView([0, 0], 2);
+
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Initialize marker cluster group
+            var markers = L.markerClusterGroup();
+
+            // Fetch location data from server
+            fetch('/locations')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(location => {
+                        var marker = L.marker([location.latitude, location.longitude], {
+                            title: location.SSID // Use SSID for search
+                        });
+
+                        var popupContent = `<strong>SSID:</strong> ${location.SSID}<br><strong>Password:</strong> ${location.password}`;
+                        marker.bindPopup(popupContent);
+                        markers.addLayer(marker);
+                    });
+
+                    // Add markers to map and fit the bounds
+                    map.addLayer(markers);
+                    map.fitBounds(markers.getBounds());
+                })
+                .catch(error => console.error('Error fetching location data:', error));
+
+            // Add the Leaflet Search control
+            var searchControl = new L.Control.Search({
+                layer: markers,
+                propertyName: 'title', // Search by SSID (marker title)
+                marker: false, // Don't show a separate search marker
+                moveToLocation: function(latlng, title, map) {
+                    map.setView(latlng, 12);
+                    var popup = L.popup()
+                        .setLatLng(latlng)
+                        .setContent('<strong>SSID:</strong> ' + title)
+                        .openOn(map);
+                }
+            });
+
+            // Add search control to map
+            map.addControl(searchControl);
+        });
+    </script>
+</body>
+</html>

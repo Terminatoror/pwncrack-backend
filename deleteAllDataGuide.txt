@@ -1,0 +1,45 @@
+
+To delete all data from the `hash_data`, `hashrate`, `upload_logs`, and `users` tables, run the following SQL commands:
+
+1. Connect to your MySQL database:
+```
+mysql -u root -p
+```
+
+2. Select the `pwncrack` database:
+```
+USE pwncrack;
+```
+
+3. Delete all data from the `hash_data` table:
+```
+DELETE FROM hash_data;
+```
+
+4. Delete all data from the `hashrate` table:
+```
+DELETE FROM hashrate;
+```
+
+5. Delete all data from the `upload_logs` table:
+```
+DELETE FROM upload_logs;
+```
+
+6. Delete all data from the `users` table:
+```
+DELETE FROM users;
+```
+
+7. Verify that the tables are empty:
+```
+SELECT * FROM hash_data;
+SELECT * FROM hashrate;
+SELECT * FROM upload_logs;
+SELECT * FROM users;
+```
+
+8. Exit the MySQL shell:
+```
+exit;
+```

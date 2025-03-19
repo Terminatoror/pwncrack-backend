@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWNcrack - FAQ</title>
+  <link id="theme-stylesheet" rel="preload" href="/user-theme.css" as="style">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <style>
+    /* Hide the body until the CSS is loaded */
+    body {
+      display: none;
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+    }
+    @media (max-width: 830px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-key, #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        margin: 5px 0; /* Add margin to prevent overlap */
+      }
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #menu-toggle {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+      }
+    }
+    @media (max-width: 830px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #menu-toggle {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+      }
+      #login-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <button id="menu-toggle">Menu</button>
+      <ul id="nav-menu">
+        <li><a href="index.html">Key</a></li>
+        <li><a href="submit.html">Submit</a></li>
+        <li><a href="nets.html">Nets</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="donations.html">Donations</a></li>
+        <li><a href="rank.html">Rank</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div id="login-container" style="position: absolute; top: 10px; right: 10px;">
+    <span id="loggedIn" data-loggedin="false">Key: Not Logged In</span><br>
+    <span id="user-rank">Rank: common</span><br>
+    <span id="rank-time">Rank-Time: N/A</span><br>
+    <input type="text" id="login-key" placeholder="Enter Key" />
+    <button id="login-button">Login</button>
+    <button id="logout-button" style="display:none;">Logout</button>
+  </div>  
+  <main>
+    <section>
+      <h2>What is PWNcrack?</h2>
+      <p>PWNcrack is a distributed password cracking platform that allows users to upload WPA handshake files and leverage the power of multiple GPUs to crack passwords. The platform supports integration with Pwnagotchi and Angry Oxide.</p>
+      
+      <h2>How does it work?</h2>
+      <p>Users can upload WPA handshake files in the <code>.hc22000</code> format. These files are distributed to GPU donors who run the cracking tasks. Once a password is cracked, it is stored in the user's potfile and can be downloaded.</p>
+      
+      <h2>What are VIP accounts?</h2>
+      <p>VIP accounts get prioritized handshake cracking, meaning their files are processed faster than those of regular users.</p>
+      
+      <h2>How can I become a VIP?</h2>
+      <p>You can become a VIP by redeeming a rank key or by being one of the top GPU donors. The users who donate the most GPU power will receive a free VIP rank as a token of appreciation.</p>
+      
+      <h2>What is the leaderboard?</h2>
+      <p>The leaderboard displays the top contributors to the platform, ranked by the number of hashes cracked, uploaded hashes, and the percentage of hashes cracked.</p>
+      
+      <h2>What are visual themes?</h2>
+      <p>Users can customize the appearance of the site by selecting different visual themes. This can be done in the settings page.</p>
+      
+      <h2>How do I use my Pwnagotchi with PWNcrack?</h2>
+      <p>PWNcrack supports integration with Pwnagotchi. There is a Pwnagotchi plugin available to easily integrate PWNcrack into your Pwnagotchi device, allowing you to upload handshake files captured by your device and have them cracked by the platform. You can find the plugin on our <a href="https://github.com/Terminatoror/pwncrack-addons">GitHub repository</a>.</p>
+      
+      <h2>Is there Angry Oxide support?</h2>
+      <p>Angry Oxide is a tool for capturing WPA handshakes. PWNcrack supports files generated by Angry Oxide, and there are scripts available to help you easily integrate and upload these files to the platform for cracking. You can find the scripts on our <a href="https://github.com/Terminatoror/pwncrack-addons">GitHub repository</a>.</p>
+      
+      <h2>How do I get started?</h2>
+      <p>To get started, request a unique key by entering your email on the <a href="index.html">Key</a> page. Once you have your key, you can log in and start uploading handshake files for cracking.</p>
+      
+      <h2>How can I donate GPU power?</h2>
+      <p>If you have a powerful GPU and want to contribute to the platform, you can run the cracking tasks on your machine. The more you contribute, the higher your chances of receiving a free VIP rank. You can find more information on how to donate GPU power on our <a href="https://github.com/Terminatoror/pwncrack-addons">GitHub repository</a>.</p>
+      
+      <h2>Need more help?</h2>
+      <p>If you have any other questions or need further assistance, feel free to contact us at <a href="mailto:pwncrack.org@gmail.com">pwncrack.org@gmail.com</a>.</p>
+    </section>
+  </main>
+  <footer>
+    <p><a href="faq.html">Frequently Asked Questions</a> | &copy; 2025 Distributed WPA Cracking Initiative by <a href="https://github.com/Terminatoror">Terminatoror</a> | <a href="Terms-of-Service.html">Terms of Service</a></p>
+  </footer>
+  <script src="/js/css-loader.js"></script>
+  <script src="/js/login.js"></script>
+  <script src="/js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        themeStylesheet.href = `/user-theme.css?key=${userKey}`;
+        themeStylesheet.rel = 'stylesheet'; // Change rel to stylesheet after loading
+      }
+      const storedKey = localStorage.getItem('userKey');
+      if (storedKey) {
+        fetch(`/user-rank-info?key=${storedKey}`)
+          .then(res => res.json())
+          .then(data => {
+            const rankDisplay = document.getElementById('user-rank');
+            rankDisplay.textContent = 'Rank: ' + (data.rank ? data.rank : 'common');
+            const rankTimeDisplay = document.getElementById('rank-time');
+            let timeRemaining = data.timeRemaining;
+            function updateCountdown() {
+              let remaining = timeRemaining;
+              const months = Math.floor(remaining / (30 * 24 * 3600));
+              remaining %= (30 * 24 * 3600);
+              const days = Math.floor(remaining / (24 * 3600));
+              remaining %= (24 * 3600);
+              const hours = Math.floor(remaining / 3600);
+              remaining %= 3600;
+              const minutes = Math.floor(remaining / 60);
+              const seconds = remaining % 60;
+              rankTimeDisplay.textContent = `Rank-Time: ${months}mo ${days}d ${hours}h ${minutes}m ${seconds}s`;
+              if (timeRemaining > 0) {
+                timeRemaining--;
+              }
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+          })
+          .catch(err => {
+            console.error('Error fetching rank info:', err);
+          });
+      }
+    });
+  </script>
+</body>
+</html>

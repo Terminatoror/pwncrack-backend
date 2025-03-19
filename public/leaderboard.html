@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWNcrack - Leaderboard</title>
+  <link id="theme-stylesheet" rel="preload" href="/user-theme.css" as="style">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <style>
+    /* Hide the body until the CSS is loaded */
+    body {
+      display: none;
+    }
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .leaderboard-table th, .leaderboard-table td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    .tab-container {
+      margin: 20px 0;
+    }
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab-button {
+      padding: 10px 20px;
+      border: none;
+      background: #444;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .tab-button.active {
+      background: #666;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .time-format {
+      white-space: nowrap;
+    }
+    @media (max-width: 830px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <button id="menu-toggle">Menu</button>
+      <ul id="nav-menu">
+        <li><a href="index.html">Key</a></li>
+        <li><a href="submit.html">Submit</a></li>
+        <li><a href="nets.html">Nets</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="donations.html">Donations</a></li>
+        <li><a href="rank.html">Rank</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div id="login-container" style="position: absolute; top: 10px; right: 10px;">
+    <span id="loggedIn" data-loggedin="false">Key: Not Logged In</span><br>
+    <span id="user-rank">Rank: common</span><br>
+    <span id="rank-time">Rank-Time: N/A</span><br>
+    <input type="text" id="login-key" placeholder="Enter Key" />
+    <button id="login-button">Login</button>
+    <button id="logout-button" style="display:none;">Logout</button>
+  </div>  
+  <main>
+    <section>
+      <h1>Leaderboard</h1>
+      
+      <div class="tab-container">
+        <div class="tab-buttons">
+          <button class="tab-button active" data-tab="uploaders">Uploaders</button>
+          <button class="tab-button" data-tab="crackers">Crackers</button>
+        </div>
+        
+        <div id="uploaders-tab" class="tab-content active">
+          <p>Check out the top uploaders:</p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <label for="sortOption">Sort by:</label>
+              <select id="sortOption">
+                <option value="hashesCracked">Hashes Cracked</option>
+                <option value="uploadedHashes">Uploaded Hashes</option>
+                <option value="percentCracked">Percent Cracked</option>
+              </select>
+            </div>
+          </div>
+          <table class="leaderboard-table" id="leaderboardTable">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Username</th>
+                <th>Uploaded Hashes</th>
+                <th>Hashes Cracked</th>
+                <th>% Cracked</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-table-body">
+              <!-- Uploaders entries will be dynamically added here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="crackers-tab" class="tab-content">
+          <p>Top 3 people on this leaderboard will recieve a free rank key when the countdown hits 0!</p>
+          <p>They will get an e-mail! Be sure to check your spam folder too!</p>
+          <p>Top contributors by processing power:</p>
+          <label for="crackerSortOption">Sort by:</label>
+          <select id="crackerSortOption">
+            <option value="processedHashes">Processed Hashes</option>
+            <option value="totalTime">Time Contributed</option>
+          </select>
+          <div id="weekly-countdown" style="text-align: center;"></div>
+          <table class="leaderboard-table" id="crackersTable">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Username</th>
+                <th>Processed Hashes</th>
+                <th>Time Contributed</th>
+                <th>Avg Hashrate</th>
+              </tr>
+            </thead>
+            <tbody id="crackers-table-body">
+              <!-- Crackers entries will be dynamically added here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p><a href="faq.html">Frequently Asked Questions</a> | &copy; 2025 Distributed WPA Cracking Initiative by <a href="https://github.com/Terminatoror">Terminatoror</a> | <a href="Terms-of-Service.html">Terms of Service</a></p>
+  </footer>
+  <script src="/js/css-loader.js"></script>
+  <script src="/js/login.js"></script>
+  <script src="/js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        themeStylesheet.href = `/user-theme.css?key=${userKey}`;
+        themeStylesheet.rel = 'stylesheet'; // Change rel to stylesheet after loading
+      }
+
+      // Tab switching logic
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          button.classList.add('active');
+          const tabId = button.dataset.tab + '-tab';
+          document.getElementById(tabId).classList.add('active');
+          
+          if (button.dataset.tab === 'uploaders') {
+            fetchLeaderboardData();
+          } else {
+            fetchCrackerData();
+          }
+        });
+      });
+
+      // Existing uploaders leaderboard code
+      const sortOption = document.getElementById('sortOption');
+      sortOption.addEventListener('change', fetchLeaderboardData);
+      
+      // New crackers leaderboard code
+      const crackerSortOption = document.getElementById('crackerSortOption');
+      crackerSortOption.addEventListener('change', fetchCrackerData);
+
+      function formatTime(seconds) {
+        const days = Math.floor(seconds / 86400);
+        seconds %= 86400;
+        const hours = Math.floor(seconds / 3600);
+        seconds %= 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds %= 60;
+        
+        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }
+
+      function formatHashrate(hashrate) {
+        if (hashrate >= 1e9) {
+          return `${(hashrate / 1e9).toFixed(2)} GH/s`;
+        } else if (hashrate >= 1e6) {
+          return `${(hashrate / 1e6).toFixed(2)} MH/s`;
+        } else if (hashrate >= 1e3) {
+          return `${(hashrate / 1e3).toFixed(2)} kH/s`;
+        }
+        return `${Math.floor(hashrate)} H/s`;
+      }
+
+      function fetchCrackerData() {
+        const sortBy = crackerSortOption.value;
+        const userKey = localStorage.getItem('userKey');
+        
+        fetch('/cracker_leaderboard?sortBy=' + sortBy + '&key=' + userKey)
+          .then(response => response.json())
+          .then(data => {
+            const tableBody = document.getElementById('crackers-table-body');
+            tableBody.innerHTML = '';
+
+            if (!data || !data.length) {
+              tableBody.innerHTML = '<tr><td colspan="5">No entries yet.</td></tr>';
+              return;
+            }
+
+            data.sort((a, b) => b[sortBy] - a[sortBy]);
+
+            data.forEach((entry, index) => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${index + 1}.</td>
+                <td>${entry.rank === 'VIP' ? '<span style="color: lime;"> [VIP] ' + entry.username + '</span>' : entry.username}</td>
+                <td>${entry.processed_hashes ? entry.processed_hashes.toLocaleString() : '0'}</td>
+                <td class="time-format">${formatTime(entry.total_time || 0)}</td>
+                <td>${formatHashrate(entry.avg_hashrate || 0)}</td>
+              `;
+              tableBody.appendChild(row);
+            });
+          })
+          .catch(error => {
+            console.error("Error fetching cracker data:", error);
+            const tableBody = document.getElementById('crackers-table-body');
+            tableBody.innerHTML = '<tr><td colspan="5">Error loading data</td></tr>';
+          });
+      }
+
+      function fetchLeaderboardData() {
+        const sortBy = sortOption.value;
+        fetch(`/leaderboard?sortBy=${sortBy}`)
+          .then(response => response.json())
+          .then(data => {
+            const leaderboardTableBody = document.getElementById('leaderboard-table-body');
+            leaderboardTableBody.innerHTML = ''; // Clear the table before updating
+
+            if (data.length === 0) {
+              leaderboardTableBody.innerHTML = '<tr><td colspan="5">No entries yet.</td></tr>';
+            } else {
+              let rank = 1;
+              data
+                .filter(entry => entry.username) // Only include entries with a username
+                .forEach((entry, index, array) => {
+                  if (index > 0 && array[index - 1][sortBy] !== entry[sortBy]) {
+                    rank = index + 1;
+                  }
+                  const row = document.createElement('tr');
+                  const rankCell = document.createElement('td');
+                  const usernameCell = document.createElement('td');
+                  const uploadedHashesCell = document.createElement('td');
+                  const hashesCrackedCell = document.createElement('td');
+                  const percentCrackedCell = document.createElement('td');
+
+                  rankCell.textContent = `${rank}.`;
+                  if (entry.rank === 'VIP') {
+                    usernameCell.innerHTML = `<span style="color: lime;">${entry.username}</span>`;
+                  } else {
+                    usernameCell.textContent = entry.username;
+                  }
+                  uploadedHashesCell.textContent = entry.uploadedHashes;
+                  hashesCrackedCell.textContent = entry.hashesCracked;
+                  percentCrackedCell.textContent = entry.percentCracked;
+
+                  row.appendChild(rankCell);
+                  row.appendChild(usernameCell);
+                  row.appendChild(uploadedHashesCell);
+                  row.appendChild(hashesCrackedCell);
+                  row.appendChild(percentCrackedCell);
+                  leaderboardTableBody.appendChild(row);
+                });
+            }
+          })
+          .catch(error => {
+            console.error("Error fetching leaderboard data:", error);
+          });
+      }
+
+      fetchLeaderboardData(); // Initial fetch
+
+      const storedKey = localStorage.getItem('userKey');
+      if (storedKey) {
+        fetch(`/user-rank-info?key=${storedKey}`)
+          .then(res => res.json())
+          .then(data => {
+            const rankDisplay = document.getElementById('user-rank');
+            rankDisplay.textContent = 'Rank: ' + (data.rank ? data.rank : 'common');
+            const rankTimeDisplay = document.getElementById('rank-time');
+            let timeRemaining = data.timeRemaining;
+            function updateCountdown() {
+              let remaining = timeRemaining;
+              const months = Math.floor(remaining / (30 * 24 * 3600));
+              remaining %= (30 * 24 * 3600);
+              const days = Math.floor(remaining / (24 * 3600));
+              remaining %= (24 * 3600);
+              const hours = Math.floor(remaining / 3600);
+              remaining %= 3600;
+              const minutes = Math.floor(remaining / 60);
+              const seconds = remaining % 60;
+              rankTimeDisplay.textContent = `Rank-Time: ${months}mo ${days}d ${hours}h ${minutes}m ${seconds}s`;
+              if (timeRemaining > 0) {
+                timeRemaining--;
+              }
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+          })
+          .catch(err => {
+            console.error('Error fetching rank info:', err);
+          });
+      }
+
+      // Modified getNextMonday: always returns next Monday 0:00 UTC
+      function getNextMonday() {
+        const now = new Date();
+        const day = now.getUTCDay();
+        const result = new Date(now);
+        result.setUTCHours(0, 0, 0, 0);
+        let diff = (8 - day) % 7;
+        if (diff === 0) diff = 7;
+        result.setUTCDate(result.getUTCDate() + diff);
+        return result;
+      }
+
+      // Modified updateWeeklyCountdown: triggers rank key distribution when countdown <= 0, then resets
+      function updateWeeklyCountdown() {
+        const now = new Date();
+        const nextMonday = getNextMonday();
+        const timeRemaining = Math.floor((nextMonday - now) / 1000);
+
+        if (timeRemaining <= 0) {
+          if (!window.rankKeysTriggered) {
+            window.rankKeysTriggered = true;
+            fetch('/trigger-rank-key-distribution')
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  console.log('Rank keys distributed successfully.');
+                } else {
+                  console.error('Failed to distribute rank keys.');
+                }
+              })
+              .catch(error => {
+                console.error('Error triggering rank key distribution:', error);
+              });
+          }
+        } else {
+          window.rankKeysTriggered = false;
+        }
+
+        const days = Math.floor(timeRemaining / 86400);
+        const hours = Math.floor((timeRemaining % 86400) / 3600);
+        const minutes = Math.floor((timeRemaining % 3600) / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('weekly-countdown').textContent = `Next rank giveaway: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }
+
+      setInterval(updateWeeklyCountdown, 1000);
+      updateWeeklyCountdown();
+    });
+  </script>
+</body>
+</html>

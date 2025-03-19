@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWNcrack - Keygen</title>
+  <link id="theme-stylesheet" rel="preload" href="/user-theme.css" as="style">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <style>
+    /* Hide the body until the CSS is loaded */
+    body {
+      display: none;
+    }
+    .gif-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+    }
+    @media (max-width: 830px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        margin: 5px 0; /* Add margin to prevent overlap */
+      }
+    }
+    @media (max-width: 600px) {
+      #loggedIn, #user-rank, #rank-time {
+        display: none;
+      }
+      #login-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      #login-key {
+        position: absolute;
+        top: 17px; /* Set top to 17px */
+        right: 80px; /* Set right to 80px */
+      }
+      #login-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        margin: 5px 0; /* Add margin to prevent overlap */
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <button id="menu-toggle">Menu</button>
+      <ul id="nav-menu">
+        <li><a href="index.html">Key</a></li>
+        <li><a href="submit.html">Submit</a></li>
+        <li><a href="nets.html">Nets</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="stats.html">Stats</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="donations.html">Donations</a></li>
+        <li><a href="rank.html">Rank</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div id="login-container" style="position: absolute; top: 10px; right: 10px;">
+    <span id="loggedIn" data-loggedin="false">Key: Not Logged In</span><br>
+    <span id="user-rank">Rank: common</span><br>
+    <span id="rank-time">Rank-Time: N/A</span><br>
+    <input type="text" id="login-key" placeholder="Enter Key" />
+    <button id="login-button">Login</button>
+    <button id="logout-button" style="display:none;">Logout</button>
+  </div>  
+  <script src="/js/css-loader.js"></script>
+  <script src="/js/login.js"></script>
+  <script src="/js/script.js"></script>
+  <script>
+    // Function to request a unique key by submitting email
+    function requestKey() {
+        const email = document.getElementById('email').value;
+
+        // Check if email is empty
+        if (!email) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+
+        // Send the email to the server to request a key
+        fetch('/request-key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.key) {
+                alert('Email sent successfully! Check your spam folder too!');
+            } else if (data.error) {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(err => {
+            alert('An error occurred while requesting the key: ' + err);
+        });
+    }
+
+    // Function to regenerate a key by submitting email
+    function regenerateKey() {
+        const email = document.getElementById('email').value;
+
+        // Check if email is empty
+        if (!email) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+
+        // Send the email to the server to regenerate a key
+        fetch('/regenerate-key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.key) {
+                alert('Email sent successfully! Check your spam folder too!');
+            } else if (data.error) {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(err => {
+            alert('An error occurred while regenerating the key: ' + err);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const userKey = localStorage.getItem('userKey');
+      if (userKey) {
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        themeStylesheet.href = `/user-theme.css?key=${userKey}`;
+        themeStylesheet.rel = 'stylesheet'; // Change rel to stylesheet after loading
+      }
+      const storedKey = localStorage.getItem('userKey');
+      if (storedKey) {
+        fetch(`/user-rank-info?key=${storedKey}`)
+          .then(res => res.json())
+          .then(data => {
+            const rankDisplay = document.getElementById('user-rank');
+            rankDisplay.textContent = 'Rank: ' + (data.rank ? data.rank : 'common');
+            const rankTimeDisplay = document.getElementById('rank-time');
+            let timeRemaining = data.timeRemaining;
+            function updateCountdown() {
+              let remaining = timeRemaining;
+              const months = Math.floor(remaining / (30 * 24 * 3600));
+              remaining %= (30 * 24 * 3600);
+              const days = Math.floor(remaining / (24 * 3600));
+              remaining %= (24 * 3600);
+              const hours = Math.floor(remaining / 3600);
+              remaining %= 3600;
+              const minutes = Math.floor(remaining / 60);
+              remaining %= 60;
+              const seconds = remaining;
+              rankTimeDisplay.textContent = `Rank-Time: ${months}m ${days}d ${hours}h ${minutes}m ${seconds}s`;
+              if (timeRemaining > 0) {
+                timeRemaining--;
+                setTimeout(updateCountdown, 1000);
+              }
+            }
+            updateCountdown();
+          })
+          .catch(err => {
+            console.error('Error fetching rank info:', err);
+          });
+      }
+    });
+  </script>
+<h1>Welcome to Pwncrack</h1>
+<p>Note: Input a valid e-mail as your key gets sent there!</p>
+<p>To get your unique key, please enter your email address below:</p>
+<!-- Email form for requesting or regenerating a key -->
+<form onsubmit="event.preventDefault();">
+    <input type="checkbox" id="tos-checkbox" required>
+    <label for="tos-checkbox">I have read & accept the <a href="Terms-of-Service.html" target="_blank">Terms of Service</a></label>
+    <br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    <br>
+    <button type="button" onclick="requestKey()" style="margin-right: 5px;">Request Key</button>
+    <button type="button" onclick="regenerateKey()">Regenerate Key</button>
+</form>
+<br>
+<a href="/donations.html">Donations</a> | <a href="/submit">Submit a Handshake</a>
+
+<footer>
+  <p><a href="faq.html">Frequently Asked Questions</a> | &copy; 2025 Distributed WPA Cracking Initiative by <a href="https://github.com/Terminatoror">Terminatoror</a> | <a href="Terms-of-Service.html">Terms of Service</a></p>
+</footer>
+</body>
+</html>
